@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pickup</title>
+<meta name="description" content="Save and resume your spot in Spotify playlists and albums.">
+<meta name="theme-color" content="#16130f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f0a04b'/%3E%3Cpath d='M20 12h24v40l-12-9-12 9z' fill='%231b1309'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f0a04b'/%3E%3Cpath d='M20 12h24v40l-12-9-12 9z' fill='%231b1309'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f6f2ec; --card:#ffffff; --ink:#1d1a16; --muted:#6f675d; --line:#e6dfd4;
+  --accent:#d9822b; --accent-ink:#ffffff; --soft:#f1e7da; --danger:#b4442f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --card:#221e19; --ink:#f3ede4; --muted:#a59b8e; --line:#352f27;
+    --accent:#f0a04b; --accent-ink:#1b1309; --soft:#2c261f; --danger:#e57b62;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --card:#221e19; --ink:#f3ede4; --muted:#a59b8e; --line:#352f27;
+  --accent:#f0a04b; --accent-ink:#1b1309; --soft:#2c261f; --danger:#e57b62;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding:max(16px,env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+}
+.wrap{max-width:560px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 18px}
+h1{font-size:24px;margin:0;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+h1 svg{width:22px;height:22px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:26px 0 10px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.row{display:flex;gap:12px;align-items:center}
+.art{width:56px;height:56px;border-radius:8px;flex:none;background:var(--soft);object-fit:cover}
+.art.big{width:72px;height:72px}
+.grow{flex:1;min-width:0}
+.title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tiny{color:var(--muted);font-size:13px}
+.list{display:flex;flex-direction:column;gap:10px}
+.btn{
+  appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  font:inherit;font-weight:600;font-size:15px;border-radius:999px;padding:10px 16px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;
+}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.block{width:100%;margin-top:12px;padding:13px}
+.btn.small{padding:8px 14px;font-size:14px}
+.btn.icon{padding:8px;width:36px;height:36px;border-radius:50%;color:var(--muted)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:active:not(:disabled){transform:scale(.97)}
+.actions{display:flex;gap:8px;align-items:center;flex:none}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--soft);color:var(--accent);border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.empty{color:var(--muted);font-size:15px;padding:4px 2px}
+.bar{height:4px;background:var(--soft);border-radius:2px;margin-top:10px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+input[type=text]{
+  width:100%;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);margin-top:8px
+}
+.code{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--soft);
+  padding:10px 12px;border-radius:10px;word-break:break-all;margin-top:8px}
+ol{padding-left:20px;margin:8px 0}
+ol li{margin:6px 0}
+a{color:var(--accent)}
+footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.link{background:none;border:none;color:var(--muted);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer;padding:4px}
+#toast{
+  position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:528px;margin:0 auto;
+  background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 14px;font-size:15px;
+  display:flex;gap:12px;align-items:center;justify-content:space-between;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);transform:translateY(calc(100% + 60px));visibility:hidden;transition:transform .25s ease,visibility .25s;z-index:10
+}
+#toast.show{transform:none;visibility:visible}
+#toast .btn{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);flex:none}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-recently-played';
+  const REDIRECT = location.origin + location.pathname.replace(/index\.html$/, '');
+  const API = 'https://api.spotify.com/v1';
+
+  // ---------- storage ----------
+  const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const drop = (k) => { try { localStorage.removeItem(k); } catch {} };
+
+  const state = {
+    clientId: load('ph_client_id', ''),
+    tokens: load('ph_tokens', null),
+    spots: load('ph_spots', {}),
+    names: load('ph_names', {}),
+    player: null,
+    recent: [],
+    loading: false,
+    busy: null,
+  };
+  const persistSpots = () => save('ph_spots', state.spots);
+
+  // ---------- helpers ----------
+  const $app = document.getElementById('app');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = (ms) => { ms = Math.max(0, ms || 0); const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const ago = (t) => {
+    const s = Math.round((Date.now() - t) / 1000);
+    if (s < 60) return 'just now';
+    const m = Math.round(s / 60); if (m < 60) return m + ' min ago';
+    const h = Math.round(m / 60); if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+    const d = Math.round(h / 24); return d + (d === 1 ? ' day ago' : ' days ago');
+  };
+  const pickImg = (imgs) => (imgs && imgs.length) ? (imgs[1] || imgs[0]).url : null;
+  const artistsOf = (t) => (t && t.artists ? t.artists.map(a => a.name).join(', ') : (t && t.show ? t.show.name : ''));
+  const trackImg = (t) => t ? pickImg((t.album && t.album.images) || (t.images) || []) : null;
+  const ctxType = (uri) => uri.endsWith(':collection') ? 'collection' : uri.split(':')[1];
+
+  let toastTimer;
+  function toast(msg, actionHtml = '', ms = 4000) {
+    const el = document.getElementById('toast');
+    el.innerHTML = `<span>${esc(msg)}</span>${actionHtml}`;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+  }
+  const openSpotifyBtn = '<a class="btn small" href="spotify:">Open Spotify</a>';
+
+  // ---------- auth (PKCE) ----------
+  const randStr = (n) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const v = crypto.getRandomValues(new Uint8Array(n));
+    return Array.from(v, x => chars[x % chars.length]).join('');
+  };
+  const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  async function login() {
+    const verifier = randStr(64);
+    const st = randStr(16);
+    save('ph_verifier', verifier);
+    save('ph_state', st);
+    const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+    const q = new URLSearchParams({
+      response_type: 'code', client_id: state.clientId, scope: SCOPES,
+      code_challenge_method: 'S256', code_challenge: challenge, redirect_uri: REDIRECT, state: st,
+    });
+    location.href = 'https://accounts.spotify.com/authorize?' + q.toString();
+  }
+
+  async function tokenRequest(body) {
+    const res = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error_description || data.error || ('Login failed (' + res.status + ')'));
+    state.tokens = {
+      access: data.access_token,
+      refresh: data.refresh_token || (state.tokens && state.tokens.refresh),
+      expires: Date.now() + (data.expires_in - 60) * 1000,
+    };
+    save('ph_tokens', state.tokens);
+  }
+
+  async function finishLogin(params) {
+    const expected = load('ph_state', null);
+    history.replaceState({}, '', REDIRECT);
+    if (params.get('state') !== expected) { toast('Login didn\'t match. Please try again.'); return; }
+    try {
+      await tokenRequest({
+        grant_type: 'authorization_code', code: params.get('code'), redirect_uri: REDIRECT,
+        client_id: state.clientId, code_verifier: load('ph_verifier', ''),
+      });
+    } catch (e) { toast(e.message, '', 7000); }
+    drop('ph_verifier'); drop('ph_state');
+  }
+
+  async function refreshToken() {
+    if (!state.tokens || !state.tokens.refresh) throw Object.assign(new Error('Please log in again.'), { status: 401 });
+    await tokenRequest({ grant_type: 'refresh_token', refresh_token: state.tokens.refresh, client_id: state.clientId });
+  }
+
+  function logout() {
+    state.tokens = null; drop('ph_tokens');
+    state.player = null; state.recent = [];
+    render();
+  }
+
+  // ---------- API ----------
+  async function api(method, path, body, retry = true) {
+    if (!state.tokens) throw Object.assign(new Error('Not logged in'), { status: 401 });
+    if (Date.now() > state.tokens.expires) await refreshToken();
+    const res = await fetch(API + path, {
+      method,
+      headers: Object.assign({ Authorization: 'Bearer ' + state.tokens.access }, body ? { 'Content-Type': 'application/json' } : {}),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (res.status === 401 && retry) { await refreshToken(); return api(method, path, body, false); }
+    if (res.status === 204 || res.status === 202) return null;
+    const text = await res.text();
+    let data = null; try { data = text ? JSON.parse(text) : null; } catch {}
+    if (!res.ok) {
+      const err = data && data.error;
+      const e = new Error((err && (err.message || err)) || ('Spotify error ' + res.status));
+      e.status = res.status; e.reason = err && err.reason;
+      throw e;
+    }
+    return data;
+  }
+
+  async function ctxInfo(uri) {
+    if (state.names[uri]) return state.names[uri];
+    const type = ctxType(uri);
+    const id = uri.split(':').pop();
+    let info = null;
+    try {
+      if (type === 'collection') info = { name: 'Liked Songs', image: null };
+      else if (type === 'playlist') { const d = await api('GET', `/playlists/${id}?fields=name,images`); info = { name: d.name, image: pickImg(d.images) }; }
+      else if (type === 'album') { const d = await api('GET', `/albums/${id}`); info = { name: d.name, image: pickImg(d.images), by: (d.artists || []).map(a => a.name).join(', ') }; }
+      else if (type === 'artist') { const d = await api('GET', `/artists/${id}`); info = { name: d.name + ' (artist)', image: pickImg(d.images) }; }
+      else if (type === 'show') { const d = await api('GET', `/shows/${id}`); info = { name: d.name, image: pickImg(d.images) }; }
+    } catch { /* Spotify-made mixes often can't be looked up; use a fallback */ }
+    if (info) { state.names[uri] = info; save('ph_names', state.names); return info; }
+    return { name: type === 'playlist' ? 'Playlist' : type === 'album' ? 'Album' : 'Spotify list', image: null };
+  }
+  const nameOf = (uri) => (state.names[uri] && state.names[uri].name) || (ctxType(uri) === 'collection' ? 'Liked Songs' : '…');
+  const imgOf = (uri, fallback) => (state.names[uri] && state.names[uri].image) || fallback || '';
+
+  // ---------- spots ----------
+  function makeSpot(ctxUri, track, progressMs, shuffle, source, when) {
+    return {
+      contextUri: ctxUri, trackUri: track.uri, trackName: track.name, artists: artistsOf(track),
+      trackImg: trackImg(track), durationMs: track.duration_ms || 0, progressMs: progressMs || 0,
+      shuffle: typeof shuffle === 'boolean' ? shuffle : null, savedAt: when || Date.now(), source,
+    };
+  }
+
+  async function loadPlayer() {
+    state.player = await api('GET', '/me/player?additional_types=track,episode');
+  }
+  async function loadRecent() {
+    const d = await api('GET', '/me/player/recently-played?limit=50');
+    state.recent = (d && d.items) || [];
+  }
+
+  // If you're playing something that already has a saved spot, keep that spot current.
+  function syncCurrentIntoSpot() {
+    const p = state.player;
+    if (!p || !p.context || !p.item) return;
+    const s = state.spots[p.context.uri];
+    if (!s) return;
+    state.spots[p.context.uri] = makeSpot(p.context.uri, p.item, p.progress_ms, p.shuffle_state, 'live');
+    persistSpots();
+  }
+
+  // If you kept listening in Spotify after saving, move the spot forward to the latest song from history.
+  function mergeHistory() {
+    const seen = new Set();
+    for (const it of state.recent) {
+      const c = it.context && it.context.uri;
+      if (!c || seen.has(c)) continue;
+      seen.add(c);
+      const s = state.spots[c];
+      const t = Date.parse(it.played_at);
+      if (s && t > s.savedAt + 30000 && it.track.uri !== s.trackUri) {
+        state.spots[c] = makeSpot(c, it.track, 0, s.shuffle, 'history', t);
+      }
+    }
+    persistSpots();
+  }
+
+  function recentPlaces() {
+    const out = [], seen = new Set();
+    const nowCtx = state.player && state.player.context && state.player.context.uri;
+    for (const it of state.recent) {
+      const c = it.context && it.context.uri;
+      if (!c || seen.has(c)) continue;
+      seen.add(c);
+      if (state.spots[c] || c === nowCtx) continue;
+      out.push({ contextUri: c, track: it.track, playedAt: Date.parse(it.played_at) });
+      if (out.length >= 8) break;
+    }
+    return out;
+  }
+
+  async function refreshAll(quiet) {
+    if (!state.tokens) return;
+    state.loading = !quiet; if (!quiet) render();
+    const results = await Promise.allSettled([loadPlayer(), loadRecent()]);
+    const failed = results.find(r => r.status === 'rejected');
+    if (failed) handleError(failed.reason);
+    mergeHistory();
+    syncCurrentIntoSpot();
+    state.loading = false;
+    render();
+    // fetch any missing names, then re-render
+    const uris = new Set(Object.keys(state.spots));
+    if (state.player && state.player.context) uris.add(state.player.context.uri);
+    recentPlaces().forEach(r => uris.add(r.contextUri));
+    const missing = [...uris].filter(u => !state.names[u]);
+    if (missing.length) { await Promise.all(missing.map(ctxInfo)); render(); }
+  }
+
+  function handleError(e) {
+    if (!e) return;
+    if (e.status === 401) { toast('Your Spotify login expired. Please log in again.'); logout(); return; }
+    if (e.status === 403) { toast('Spotify said no: ' + e.message + '. If it mentions users, add yourself under User Management in the Spotify dashboard.', '', 9000); return; }
+    if (e.status === 429) { toast('Spotify is rate-limiting requests. Give it a minute.'); return; }
+    toast(e.message || 'Something went wrong.');
+  }
+
+  async function saveCurrent() {
+    try { await loadPlayer(); } catch (e) { return handleError(e); }
+    const p = state.player;
+    if (!p || !p.item) { render(); return toast('Nothing is playing right now.'); }
+    if (!p.context) { render(); return toast('This song wasn\'t started from a playlist or album, so there\'s no spot to save.', '', 6000); }
+    state.spots[p.context.uri] = makeSpot(p.context.uri, p.item, p.progress_ms, p.shuffle_state, 'manual');
+    persistSpots();
+    const info = await ctxInfo(p.context.uri);
+    render();
+    toast('Saved your spot in ' + info.name);
+  }
+
+  function noDevice() {
+    toast('Spotify isn\'t awake on your phone. Open it, then come back and tap Resume again.', openSpotifyBtn, 9000);
+  }
+
+  async function resume(ctxUri, trackUri, progressMs, shuffle) {
+    state.busy = ctxUri; render();
+    try {
+      // 1. Save where you are right now before switching away.
+      let p = null;
+      try { p = await api('GET', '/me/player'); } catch {}
+      let autoSaved = null;
+      if (p && p.context && p.item && p.context.uri !== ctxUri) {
+        state.spots[p.context.uri] = makeSpot(p.context.uri, p.item, p.progress_ms, p.shuffle_state, 'auto');
+        persistSpots();
+        autoSaved = p.context.uri;
+      }
+
+      // 2. Find a device to play on.
+      let deviceId = p && p.device && p.device.id;
+      if (!deviceId) {
+        const d = await api('GET', '/me/player/devices');
+        const list = (d && d.devices) || [];
+        const pick = list.find(x => x.is_active) || list.find(x => x.type === 'Smartphone') || list[0];
+        deviceId = pick && pick.id;
+      }
+      if (!deviceId) { noDevice(); return; }
+      const dq = '?device_id=' + encodeURIComponent(deviceId);
+
+      // 3. Play the list starting at the saved song and time.
+      const body = { context_uri: ctxUri, position_ms: progressMs || 0 };
+      if (trackUri && ctxType(ctxUri) !== 'artist') body.offset = { uri: trackUri };
+      let fellBack = false;
+      try {
+        await api('PUT', '/me/player/play' + dq, body);
+      } catch (e) {
+        if (e.status === 404) { noDevice(); return; }
+        if (!trackUri) throw e;
+        await api('PUT', '/me/player/play' + dq, { uris: [trackUri], position_ms: progressMs || 0 });
+        fellBack = true;
+      }
+
+      // 4. Put shuffle back the way it was.
+      if (typeof shuffle === 'boolean') {
+        setTimeout(() => api('PUT', `/me/player/shuffle?state=${shuffle}&device_id=${encodeURIComponent(deviceId)}`).catch(() => {}), 600);
+      }
+
+      if (autoSaved) await ctxInfo(autoSaved);
+      const msg = fellBack
+        ? 'Spotify wouldn\'t reopen that list, so the song is playing on its own.'
+        : 'Picked up in ' + nameOf(ctxUri) + (autoSaved ? '. Your place in ' + nameOf(autoSaved) + ' is saved.' : '.');
+      toast(msg, openSpotifyBtn, 6000);
+    } catch (e) {
+      handleError(e);
+    } finally {
+      state.busy = null;
+      setTimeout(() => refreshAll(true), 1500);
+      render();
+    }
+  }
+
+  function removeSpot(uri) {
+    if (!confirm('Forget your spot in ' + nameOf(uri) + '?')) return;
+    delete state.spots[uri]; persistSpots(); render();
+  }
+
+  function keepRecent(uri) {
+    const r = recentPlaces().find(x => x.contextUri === uri);
+    if (!r) return;
+    state.spots[uri] = makeSpot(uri, r.track, 0, null, 'history', r.playedAt);
+    persistSpots(); render();
+    toast('Saved ' + nameOf(uri) + ' to your spots');
+  }
+
+  // ---------- views ----------
+  const logo = '<svg viewBox="0 0 24 24" fill="var(--accent)" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v19l-7-5-7 5V3a1 1 0 0 1 1-1z"/></svg>';
+  const refreshIcon = (spin) => `<svg class="${spin ? 'spin' : ''}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>`;
+
+  function viewSetup() {
+    return `
+      <header><h1>${logo} Pickup</h1></header>
+      <div class="card">
+        <div class="title">One-time setup</div>
+        <ol class="sub" style="white-space:normal">
+          <li>Go to <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a> and create an app.</li>
+          <li>For <b>Redirect URI</b>, paste exactly this:
+            <div class="code" id="redir">${esc(REDIRECT)}</div>
+            <button class="btn small" data-action="copy" style="margin-top:8px">Copy</button>
+          </li>
+          <li>Tick <b>Web API</b>, save, then copy the app's <b>Client ID</b> and paste it here.</li>
+        </ol>
+        <input type="text" id="cid" placeholder="Client ID" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(state.clientId)}">
+        <button class="btn primary block" data-action="saveCid">Continue</button>
+      </div>`;
+  }
+
+  function viewLogin() {
+    return `
+      <header><h1>${logo} Pickup</h1></header>
+      <div class="card">
+        <div class="title">Save your place in any playlist or album</div>
+        <p class="sub" style="white-space:normal">Log in once with Spotify. Your saved spots stay on this phone.</p>
+        <button class="btn primary block" data-action="login">Log in with Spotify</button>
+      </div>
+      <footer><button class="link" data-action="resetCid">Change Client ID</button></footer>`;
+  }
+
+  function viewNow() {
+    const p = state.player;
+    if (!p || !p.item) {
+      return `<div class="card"><div class="empty">Nothing is playing. Start something in Spotify, then come back here.</div>
+        <a class="btn block" href="spotify:">Open Spotify</a></div>`;
+    }
+    const t = p.item;
+    const ctx = p.context && p.context.uri;
+    const pct = t.duration_ms ? Math.min(100, (p.progress_ms / t.duration_ms) * 100) : 0;
+    const where = ctx ? `in ${esc(nameOf(ctx))}` : 'not from a playlist or album';
+    const has = ctx && state.spots[ctx];
+    return `<div class="card">
+      <div class="row">
+        <img class="art big" src="${esc(trackImg(t) || '')}" alt="">
+        <div class="grow">
+          <div class="title">${esc(t.name)}</div>
+          <div class="sub">${esc(artistsOf(t))}</div>
+          <div class="tiny">${where} · ${p.is_playing ? 'playing' : 'paused'} at ${fmt(p.progress_ms)}</div>
+        </div>
+      </div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      ${ctx
+        ? `<button class="btn primary block" data-action="saveNow">${has ? 'Update my spot' : 'Save my spot'}</button>
+           ${has ? '<div class="tiny" style="margin-top:8px;text-align:center">Saved. It updates whenever you open this page.</div>' : ''}`
+        : ''}
+    </div>`;
+  }
+
+  function viewSpots() {
+    const nowCtx = state.player && state.player.context && state.player.context.uri;
+    const spots = Object.values(state.spots).sort((a, b) => b.savedAt - a.savedAt);
+    if (!spots.length) return `<div class="empty">No saved spots yet. Tap "Save my spot" while something is playing.</div>`;
+    return `<div class="list">${spots.map(s => {
+      const label = s.source === 'history' ? 'from your history ' : s.source === 'auto' ? 'saved when you switched ' : 'saved ';
+      const at = s.progressMs > 5000 ? ` at ${fmt(s.progressMs)}` : '';
+      const busy = state.busy === s.contextUri;
+      return `<div class="card"><div class="row">
+        <img class="art" src="${esc(imgOf(s.contextUri, s.trackImg))}" alt="">
+        <div class="grow">
+          <div class="title">${esc(nameOf(s.contextUri))}${s.contextUri === nowCtx ? '<span class="badge">Now</span>' : ''}</div>
+          <div class="sub">${esc(s.trackName)}${at} · ${esc(s.artists)}</div>
+          <div class="tiny">${label}${ago(s.savedAt)}</div>
+        </div>
+        <div class="actions">
+          <button class="btn primary small" data-action="resume" data-uri="${esc(s.contextUri)}" ${busy ? 'disabled' : ''}>${busy ? '…' : 'Resume'}</button>
+          <button class="btn icon" data-action="remove" data-uri="${esc(s.contextUri)}" aria-label="Forget this spot">✕</button>
+        </div>
+      </div></div>`;
+    }).join('')}</div>`;
+  }
+
+  function viewRecent() {
+    const r = recentPlaces();
+    if (!r.length) return '';
+    return `<h2>Recently played in</h2>
+      <div class="list">${r.map(x => {
+        const busy = state.busy === x.contextUri;
+        return `<div class="card"><div class="row">
+          <img class="art" src="${esc(imgOf(x.contextUri, trackImg(x.track)))}" alt="">
+          <div class="grow">
+            <div class="title">${esc(nameOf(x.contextUri))}</div>
+            <div class="sub">Last song: ${esc(x.track.name)} · ${esc(artistsOf(x.track))}</div>
+            <div class="tiny">${ago(x.playedAt)}</div>
+          </div>
+          <div class="actions">
+            <button class="btn small" data-action="keep" data-uri="${esc(x.contextUri)}">Save</button>
+            <button class="btn primary small" data-action="resumeRecent" data-uri="${esc(x.contextUri)}" ${busy ? 'disabled' : ''}>${busy ? '…' : 'Resume'}</button>
+          </div>
+        </div></div>`;
+      }).join('')}</div>`;
+  }
+
+  function viewMain() {
+    return `
+      <header>
+        <h1>${logo} Pickup</h1>
+        <button class="btn icon" data-action="refresh" aria-label="Refresh">${refreshIcon(state.loading)}</button>
+      </header>
+      <h2 style="margin-top:0">Now playing</h2>
+      ${viewNow()}
+      <h2>Your spots</h2>
+      ${viewSpots()}
+      ${viewRecent()}
+      <footer>
+        <button class="link" data-action="logout">Log out</button>
+        <button class="link" data-action="resetCid">Change Client ID</button>
+      </footer>`;
+  }
+
+  function render() {
+    if (!state.clientId) $app.innerHTML = viewSetup();
+    else if (!state.tokens) $app.innerHTML = viewLogin();
+    else $app.innerHTML = viewMain();
+  }
+
+  // ---------- events ----------
+  $app.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-action]');
+    if (!b) return;
+    const a = b.dataset.action, uri = b.dataset.uri;
+    if (a === 'copy') {
+      (navigator.clipboard ? navigator.clipboard.writeText(REDIRECT) : Promise.reject())
+        .then(() => toast('Copied'), () => toast('Couldn\'t copy. Select the text and copy it by hand.'));
+    } else if (a === 'saveCid') {
+      const v = (document.getElementById('cid').value || '').trim();
+      if (!/^[a-f0-9]{32}$/i.test(v)) return toast('That doesn\'t look like a Client ID (it\'s 32 letters and numbers).');
+      state.clientId = v; save('ph_client_id', v); render();
+    } else if (a === 'resetCid') {
+      state.clientId = ''; drop('ph_client_id'); logout();
+    } else if (a === 'login') login();
+    else if (a === 'logout') logout();
+    else if (a === 'refresh') refreshAll();
+    else if (a === 'saveNow') saveCurrent();
+    else if (a === 'remove') removeSpot(uri);
+    else if (a === 'keep') keepRecent(uri);
+    else if (a === 'resume') {
+      const s = state.spots[uri];
+      if (s) resume(s.contextUri, s.trackUri, s.progressMs, s.shuffle);
+    } else if (a === 'resumeRecent') {
+      const r = recentPlaces().find(x => x.contextUri === uri);
+      if (r) resume(uri, r.track.uri, 0, null);
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && state.tokens) refreshAll(true);
+  });
+  setInterval(async () => {
+    if (document.visibilityState !== 'visible' || !state.tokens || state.busy) return;
+    try { await loadPlayer(); syncCurrentIntoSpot(); render(); } catch {}
+  }, 15000);
+
+  // ---------- start ----------
+  (async function init() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('code')) await finishLogin(params);
+    else if (params.get('error')) { history.replaceState({}, '', REDIRECT); toast('Spotify login was cancelled.'); }
+    render();
+    if (state.tokens) refreshAll();
+  })();
+})();
+</script>
+</body>
+</html>
