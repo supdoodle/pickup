@@ -54,6 +54,8 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute
 .btn.block{width:100%;margin-top:12px;padding:13px}
 .btn.small{padding:8px 14px;font-size:14px}
 .btn.icon{padding:8px;width:36px;height:36px;border-radius:50%;color:var(--muted)}
+img.art[src=""]{content:url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")}
+.btn.playpause{width:52px;height:52px;padding:0;border-radius:50%;flex:none}
 .btn:disabled{opacity:.5;cursor:default}
 .btn:active:not(:disabled){transform:scale(.97)}
 .actions{display:flex;gap:8px;align-items:center;flex:none}
@@ -394,6 +396,25 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
     }
   }
 
+  async function togglePlay() {
+    const p = state.player;
+    if (!p || !p.item || state.toggling) return;
+    const pausing = p.is_playing;
+    const dq = p.device && p.device.id ? '?device_id=' + encodeURIComponent(p.device.id) : '';
+    state.toggling = true;
+    p.is_playing = !pausing; render();
+    try {
+      await api('PUT', '/me/player/' + (pausing ? 'pause' : 'play') + dq);
+    } catch (e) {
+      p.is_playing = pausing;
+      if (e.status === 404) noDevice(); else handleError(e);
+    } finally {
+      state.toggling = false;
+      render();
+      setTimeout(async () => { try { await loadPlayer(); render(); } catch {} }, 1200);
+    }
+  }
+
   function removeSpot(uri) {
     if (!confirm('Forget your spot in ' + nameOf(uri) + '?')) return;
     delete state.spots[uri]; persistSpots(); render();
@@ -459,6 +480,11 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
           <div class="sub">${esc(artistsOf(t))}</div>
           <div class="tiny">${where} · ${p.is_playing ? 'playing' : 'paused'} at ${fmt(p.progress_ms)}</div>
         </div>
+        <button class="btn primary playpause" data-action="togglePlay" aria-label="${p.is_playing ? 'Pause' : 'Play'}" ${state.toggling ? 'disabled' : ''}>
+          ${p.is_playing
+            ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+            : '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>'}
+        </button>
       </div>
       <div class="bar"><i style="width:${pct}%"></i></div>
       ${ctx
@@ -553,6 +579,7 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
     else if (a === 'logout') logout();
     else if (a === 'refresh') refreshAll();
     else if (a === 'saveNow') saveCurrent();
+    else if (a === 'togglePlay') togglePlay();
     else if (a === 'remove') removeSpot(uri);
     else if (a === 'keep') keepRecent(uri);
     else if (a === 'resume') {
