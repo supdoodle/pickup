@@ -32,37 +32,42 @@ body{
   padding:max(16px,env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
 }
 .wrap{max-width:560px;margin:0 auto}
-header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 18px}
-h1{font-size:24px;margin:0;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+header{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+h1{font-size:21px;margin:0;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 h1 svg{width:22px;height:22px}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:26px 0 10px;font-weight:600}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
-.row{display:flex;gap:12px;align-items:center}
-.art{width:56px;height:56px;border-radius:8px;flex:none;background:var(--soft);object-fit:cover}
-.art.big{width:72px;height:72px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.list .card{padding:8px 8px 8px 8px;border-radius:12px}
+.row{display:flex;gap:10px;align-items:center}
+.art{width:44px;height:44px;border-radius:6px;flex:none;background:var(--soft);object-fit:cover}
+.art.big{width:56px;height:56px}
 .grow{flex:1;min-width:0}
-.title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sub{color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tiny{color:var(--muted);font-size:13px}
-.list{display:flex;flex-direction:column;gap:10px}
+.title{font-weight:600;font-size:15px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{color:var(--muted);font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tiny{color:var(--muted);font-size:12px}
+.meta{display:flex;gap:4px;min-width:0}
+.meta>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta>span:last-child{flex:none}
+.list{display:flex;flex-direction:column;gap:6px}
 .btn{
   appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);
   font:inherit;font-weight:600;font-size:15px;border-radius:999px;padding:10px 16px;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;
 }
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.block{width:100%;margin-top:12px;padding:13px}
-.btn.small{padding:8px 14px;font-size:14px}
-.btn.icon{padding:8px;width:36px;height:36px;border-radius:50%;color:var(--muted)}
+.btn.block{width:100%;margin-top:10px;padding:10px}
+.btn.small{padding:7px 13px;font-size:14px}
+.btn.icon{padding:0;width:34px;height:34px;border-radius:50%;color:var(--muted)}
+.btn.x{border:none;background:none;width:28px;height:28px;font-size:13px}
 img.art[src=""]{content:url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")}
-.btn.playpause{width:52px;height:52px;padding:0;border-radius:50%;flex:none}
+.btn.playpause{width:46px;height:46px;padding:0;border-radius:50%;flex:none}
 .btn:disabled{opacity:.5;cursor:default}
 .btn:active:not(:disabled){transform:scale(.97)}
-.actions{display:flex;gap:8px;align-items:center;flex:none}
+.actions{display:flex;gap:4px;align-items:center;flex:none}
 .badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
   background:var(--soft);color:var(--accent);border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px}
 .empty{color:var(--muted);font-size:15px;padding:4px 2px}
-.bar{height:4px;background:var(--soft);border-radius:2px;margin-top:10px;overflow:hidden}
+.bar{height:3px;background:var(--soft);border-radius:2px;margin-top:8px;overflow:hidden}
 .bar>i{display:block;height:100%;background:var(--accent)}
 input[type=text]{
   width:100%;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
@@ -73,7 +78,7 @@ input[type=text]{
 ol{padding-left:20px;margin:8px 0}
 ol li{margin:6px 0}
 a{color:var(--accent)}
-footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+footer{margin-top:24px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 .link{background:none;border:none;color:var(--muted);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer;padding:4px}
 #toast{
   position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:528px;margin:0 auto;
@@ -120,10 +125,10 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
   const fmt = (ms) => { ms = Math.max(0, ms || 0); const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   const ago = (t) => {
     const s = Math.round((Date.now() - t) / 1000);
-    if (s < 60) return 'just now';
-    const m = Math.round(s / 60); if (m < 60) return m + ' min ago';
-    const h = Math.round(m / 60); if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
-    const d = Math.round(h / 24); return d + (d === 1 ? ' day ago' : ' days ago');
+    if (s < 60) return 'now';
+    const m = Math.round(s / 60); if (m < 60) return m + 'm ago';
+    const h = Math.round(m / 60); if (h < 24) return h + 'h ago';
+    const d = Math.round(h / 24); return d + 'd ago';
   };
   const pickImg = (imgs) => (imgs && imgs.length) ? (imgs[1] || imgs[0]).url : null;
   const artistsOf = (t) => (t && t.artists ? t.artists.map(a => a.name).join(', ') : (t && t.show ? t.show.name : ''));
@@ -223,22 +228,62 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
     return data;
   }
 
+  // Playlist names: try three ways, since Spotify blocks some lookups for personal apps.
+  let myPlaylistsLoaded = null;
+  async function loadMyPlaylists() {
+    // Your own and followed playlists, with names. Fetched once per session and cached.
+    if (myPlaylistsLoaded) return myPlaylistsLoaded;
+    myPlaylistsLoaded = (async () => {
+      let path = '/me/playlists?limit=50', pages = 0;
+      while (path && pages < 10) {
+        const d = await api('GET', path);
+        for (const pl of (d && d.items) || []) {
+          if (!pl || !pl.uri) continue;
+          if (!state.names[pl.uri]) state.names[pl.uri] = { name: pl.name, image: pickImg(pl.images) };
+        }
+        path = d && d.next ? d.next.replace(API, '') : null;
+        pages++;
+      }
+      save('ph_names', state.names);
+    })().catch(() => {});
+    return myPlaylistsLoaded;
+  }
+  async function oembedName(type, id) {
+    // Spotify's public "embed" lookup works for any public playlist, including Spotify-made ones.
+    const r = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(`https://open.spotify.com/${type}/${id}`));
+    if (!r.ok) throw new Error('oembed ' + r.status);
+    const d = await r.json();
+    return d && d.title ? { name: d.title, image: d.thumbnail_url || null } : null;
+  }
+
+  const failedLookups = new Set();
   async function ctxInfo(uri) {
     if (state.names[uri]) return state.names[uri];
     const type = ctxType(uri);
     const id = uri.split(':').pop();
     let info = null;
-    try {
-      if (type === 'collection') info = { name: 'Liked Songs', image: null };
-      else if (type === 'playlist') { const d = await api('GET', `/playlists/${id}?fields=name,images`); info = { name: d.name, image: pickImg(d.images) }; }
-      else if (type === 'album') { const d = await api('GET', `/albums/${id}`); info = { name: d.name, image: pickImg(d.images), by: (d.artists || []).map(a => a.name).join(', ') }; }
-      else if (type === 'artist') { const d = await api('GET', `/artists/${id}`); info = { name: d.name + ' (artist)', image: pickImg(d.images) }; }
-      else if (type === 'show') { const d = await api('GET', `/shows/${id}`); info = { name: d.name, image: pickImg(d.images) }; }
-    } catch { /* Spotify-made mixes often can't be looked up; use a fallback */ }
+    if (type === 'collection') info = { name: 'Liked Songs', image: null };
+    else if (!failedLookups.has(uri)) {
+      try {
+        if (type === 'playlist') { const d = await api('GET', `/playlists/${id}`); if (d && d.name) info = { name: d.name, image: pickImg(d.images) }; }
+        else if (type === 'album') { const d = await api('GET', `/albums/${id}`); info = { name: d.name, image: pickImg(d.images), by: (d.artists || []).map(a => a.name).join(', ') }; }
+        else if (type === 'artist') { const d = await api('GET', `/artists/${id}`); info = { name: d.name + ' (artist)', image: pickImg(d.images) }; }
+        else if (type === 'show') { const d = await api('GET', `/shows/${id}`); info = { name: d.name, image: pickImg(d.images) }; }
+      } catch {}
+      if (!info && type === 'playlist') {
+        await loadMyPlaylists();
+        info = state.names[uri] || null;
+      }
+      if (!info && type !== 'collection') {
+        try { info = await oembedName(type, id); } catch {}
+      }
+      if (!info) failedLookups.add(uri);
+    }
     if (info) { state.names[uri] = info; save('ph_names', state.names); return info; }
-    return { name: type === 'playlist' ? 'Playlist' : type === 'album' ? 'Album' : 'Spotify list', image: null };
+    return { name: fallbackName(uri), image: null };
   }
-  const nameOf = (uri) => (state.names[uri] && state.names[uri].name) || (ctxType(uri) === 'collection' ? 'Liked Songs' : '…');
+  const fallbackName = (uri) => ({ collection: 'Liked Songs', playlist: 'Playlist', album: 'Album', artist: 'Artist', show: 'Podcast' }[ctxType(uri)] || 'Spotify list');
+  const nameOf = (uri) => (state.names[uri] && state.names[uri].name) || fallbackName(uri);
   const imgOf = (uri, fallback) => (state.names[uri] && state.names[uri].image) || fallback || '';
 
   // ---------- spots ----------
@@ -488,8 +533,7 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
       </div>
       <div class="bar"><i style="width:${pct}%"></i></div>
       ${ctx
-        ? `<button class="btn primary block" data-action="saveNow">${has ? 'Update my spot' : 'Save my spot'}</button>
-           ${has ? '<div class="tiny" style="margin-top:8px;text-align:center">Saved. It updates whenever you open this page.</div>' : ''}`
+        ? `<button class="btn ${has ? '' : 'primary '}block" data-action="saveNow">${has ? 'Spot saved · update now' : 'Save my spot'}</button>`
         : ''}
     </div>`;
   }
@@ -499,19 +543,17 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
     const spots = Object.values(state.spots).sort((a, b) => b.savedAt - a.savedAt);
     if (!spots.length) return `<div class="empty">No saved spots yet. Tap "Save my spot" while something is playing.</div>`;
     return `<div class="list">${spots.map(s => {
-      const label = s.source === 'history' ? 'from your history ' : s.source === 'auto' ? 'saved when you switched ' : 'saved ';
       const at = s.progressMs > 5000 ? ` at ${fmt(s.progressMs)}` : '';
       const busy = state.busy === s.contextUri;
       return `<div class="card"><div class="row">
         <img class="art" src="${esc(imgOf(s.contextUri, s.trackImg))}" alt="">
         <div class="grow">
           <div class="title">${esc(nameOf(s.contextUri))}${s.contextUri === nowCtx ? '<span class="badge">Now</span>' : ''}</div>
-          <div class="sub">${esc(s.trackName)}${at} · ${esc(s.artists)}</div>
-          <div class="tiny">${label}${ago(s.savedAt)}</div>
+          <div class="sub meta"><span>${esc(s.trackName)}${at}</span><span>· ${ago(s.savedAt)}</span></div>
         </div>
         <div class="actions">
           <button class="btn primary small" data-action="resume" data-uri="${esc(s.contextUri)}" ${busy ? 'disabled' : ''}>${busy ? '…' : 'Resume'}</button>
-          <button class="btn icon" data-action="remove" data-uri="${esc(s.contextUri)}" aria-label="Forget this spot">✕</button>
+          <button class="btn icon x" data-action="remove" data-uri="${esc(s.contextUri)}" aria-label="Forget this spot">✕</button>
         </div>
       </div></div>`;
     }).join('')}</div>`;
@@ -527,8 +569,7 @@ footer{margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
           <img class="art" src="${esc(imgOf(x.contextUri, trackImg(x.track)))}" alt="">
           <div class="grow">
             <div class="title">${esc(nameOf(x.contextUri))}</div>
-            <div class="sub">Last song: ${esc(x.track.name)} · ${esc(artistsOf(x.track))}</div>
-            <div class="tiny">${ago(x.playedAt)}</div>
+            <div class="sub meta"><span>${esc(x.track.name)}</span><span>· ${ago(x.playedAt)}</span></div>
           </div>
           <div class="actions">
             <button class="btn small" data-action="keep" data-uri="${esc(x.contextUri)}">Save</button>
