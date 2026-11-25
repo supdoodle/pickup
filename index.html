@@ -7,7 +7,11 @@
 <meta name="description" content="Save and resume your spot in Spotify playlists and albums.">
 <meta name="theme-color" content="#16130f">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f0a04b'/%3E%3Cpath d='M20 12h24v40l-12-9-12 9z' fill='%231b1309'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f0a04b'/%3E%3Cpath d='M20 12h24v40l-12-9-12 9z' fill='%231b1309'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pickup">
 <style>
 :root{
   --bg:#f6f2ec; --card:#ffffff; --ink:#1d1a16; --muted:#6f675d; --line:#e6dfd4;
@@ -116,6 +120,7 @@ footer{margin-top:24px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
     recent: [],
     loading: false,
     busy: null,
+    installEvt: null,
   };
   const persistSpots = () => save('ph_spots', state.spots);
 
@@ -591,6 +596,7 @@ footer{margin-top:24px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
       ${viewSpots()}
       ${viewRecent()}
       <footer>
+        ${state.installEvt ? '<button class="link" data-action="install">Install app</button>' : ''}
         <button class="link" data-action="logout">Log out</button>
         <button class="link" data-action="resetCid">Change Client ID</button>
       </footer>`;
@@ -618,6 +624,10 @@ footer{margin-top:24px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
       state.clientId = ''; drop('ph_client_id'); logout();
     } else if (a === 'login') login();
     else if (a === 'logout') logout();
+    else if (a === 'install') {
+      const evt = state.installEvt; state.installEvt = null;
+      if (evt) evt.prompt().catch(() => {}).finally(render);
+    }
     else if (a === 'refresh') refreshAll();
     else if (a === 'saveNow') saveCurrent();
     else if (a === 'togglePlay') togglePlay();
@@ -639,6 +649,13 @@ footer{margin-top:24px;display:flex;gap:16px;justify-content:center;flex-wrap:wr
     if (document.visibilityState !== 'visible' || !state.tokens || state.busy) return;
     try { await loadPlayer(); syncCurrentIntoSpot(); render(); } catch {}
   }, 15000);
+
+  // ---------- install as an app ----------
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); state.installEvt = e; render(); });
+  window.addEventListener('appinstalled', () => { state.installEvt = null; render(); toast('Pickup is installed. Open it from your home screen.'); });
 
   // ---------- start ----------
   (async function init() {
